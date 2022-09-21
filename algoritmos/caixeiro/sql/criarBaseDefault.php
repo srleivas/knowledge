@@ -13,9 +13,17 @@ class GeradorTabelaCsv
     public $novaTabelaCampos = [
         'id' => 'SERIAL',
         'nome' => 'TEXT',
-        'latitude' => 'DOUBLE PRECISION',
-        'longitude' => 'DOUBLE PRECISION',
+        'latitude' => 'TEXT',
+        'longitude' => 'TEXT',
+        'pais' => 'TEXT'
     ];
+    public $mapaRelacionamentoCsvNovaTabela = [
+        'nome' => 'city',
+        'latitude' => 'lat',
+        'longitude' => 'lng',
+        'pais' => 'country'
+    ];
+    public $novaTabelaNome = 'destinos';
 
     public function __construct()
     {
@@ -40,23 +48,18 @@ class GeradorTabelaCsv
         $csv = fopen($caminhoArquivo, 'r');
         $colunasPrimeiraLinha = fgetcsv($csv);
 
-        $criaTabelaTemporariasql .= $this->criarSqlTabelaTemporária($colunasPrimeiraLinha, $nomeTabela);
-        $copiaCsvSql = $this->criarSqlTabelaFromCsv($caminhoArquivo, $nomeTabela);
+        $conjuntoQuery = [];
 
-        $this->criarSqlNovaTabela($this->novaTabelaCampos, 'destinos');
+        $conjuntoQuery[] = $this->criarSqlTabelaTemporaria($colunasPrimeiraLinha);
+        $conjuntoQuery[] = $this->criarSqlTabelaFromCsv($caminhoArquivo);
+        $conjuntoQuery[] = $this->criarSqlDropTableIfExists();
+        $conjuntoQuery[] = $this->criarSqlNovaTabela();
+        $conjuntoQuery[] = $this->criarSqlCopiaDadosTabelaTemporaria();
 
-        // if ($this->executarSql === '0') {
-        //     dump($criaTabelaTemporariasql);
-        //     dump($copiaCsvSql);
-        // }
-
-        // if ($this->executarSql === '1') {
-        //     $this->db->query($criaTabelaTemporariasql);
-        //     $this->db->query($copiaCsvSql);
-        // }
+        $this->executaSql($conjuntoQuery);
     }
 
-    protected function criarSqlTabelaTemporária(array $colunas): string
+    protected function criarSqlTabelaTemporaria(array $colunas): string
     {
         $sql = "CREATE TEMP TABLE temp_table (";
 
@@ -80,30 +83,64 @@ class GeradorTabelaCsv
         return $sql;
     }
 
-    protected function criarSqlNovaTabela(array $campos, string $nomeTabela): string
+    protected function criarSqlNovaTabela(): string
     {
         $camposSql = '';
 
-        if (is_array($campos)) {
-            foreach ($campos as $key => $value) {
+        if (is_array($this->novaTabelaCampos)) {
+            foreach ($this->novaTabelaCampos as $key => $value) {
                 $camposSql .= "{$key} {$value},";
             }
 
             $camposSql = rtrim($camposSql, ',');
         }
 
-        // Mudarei
-        $this->db->query("DROP TABLE IF EXISTS {$nomeTabela};");
-
         $sql = <<<END
-        CREATE TABLE {$nomeTabela} (
+        CREATE TABLE {$this->novaTabelaNome} (
             $camposSql
         );
         END;
 
-        $this->db->query($sql);
+        return $sql;
+    }
+
+    function criarSqlDropTableIfExists() {
+        return "DROP TABLE IF EXISTS {$this->novaTabelaNome};";
+    }
+
+    protected function criarSqlCopiaDadosTabelaTemporaria() {
+        $sqlInsertCamposNovaTabela = '(';
+        $sqlSelectCamposTabelaCsv = '';
+
+        foreach ($this->mapaRelacionamentoCsvNovaTabela as $insertColuna => $selectColunaCsv) {
+            $sqlInsertCamposNovaTabela .= "{$insertColuna},";
+            $sqlSelectCamposTabelaCsv .= "{$selectColunaCsv},";
+        }
+
+        $sqlInsertCamposNovaTabela = rtrim($sqlInsertCamposNovaTabela, ',');
+        $sqlSelectCamposTabelaCsv = rtrim($sqlSelectCamposTabelaCsv, ',');
+
+        $sqlInsertCamposNovaTabela .= ')';
+
+        $sql = <<<END
+        INSERT INTO {$this->novaTabelaNome} {$sqlInsertCamposNovaTabela}
+        SELECT {$sqlSelectCamposTabelaCsv} FROM temp_table
+        END;
 
         return $sql;
+    }
+
+    protected function executaSql(array $conjuntoQuery): void
+    {
+        if ($this->executarSql === '0') {
+            dump($conjuntoQuery);
+        }
+
+        if (empty($this->executarSql) || $this->executarSql === '1') {
+            foreach ($conjuntoQuery as $sql) {
+                $this->db->query($sql);
+            }
+        }
     }
 }
 
