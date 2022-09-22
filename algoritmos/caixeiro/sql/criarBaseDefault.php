@@ -13,14 +13,14 @@ class GeradorTabelaCsv
     public $novaTabelaCampos = [
         'id' => 'SERIAL',
         'nome' => 'TEXT',
-        'latitude' => 'TEXT',
-        'longitude' => 'TEXT',
+        'latitude' => 'DOUBLE PRECISION',
+        'longitude' => 'DOUBLE PRECISION',
         'pais' => 'TEXT'
     ];
     public $mapaRelacionamentoCsvNovaTabela = [
         'nome' => 'city',
-        'latitude' => 'lat',
-        'longitude' => 'lng',
+        'latitude' => 'lat::DOUBLE PRECISION',
+        'longitude' => 'lng::DOUBLE PRECISION',
         'pais' => 'country'
     ];
     public $novaTabelaNome = 'destinos';
@@ -37,10 +37,6 @@ class GeradorTabelaCsv
 
     public function importaCsvEmTabela(string $caminhoArquivo)
     {
-        $criaTabelaTemporariasql = '';
-        $copiaCsvSql = '';
-        $nomeTabela = 'destinos';
-
         if (!file_exists($caminhoArquivo)) {
             throw new Exception('Arquivo não encontrado!');
         }
@@ -104,11 +100,13 @@ class GeradorTabelaCsv
         return $sql;
     }
 
-    function criarSqlDropTableIfExists() {
+    protected function criarSqlDropTableIfExists()
+    {
         return "DROP TABLE IF EXISTS {$this->novaTabelaNome};";
     }
 
-    protected function criarSqlCopiaDadosTabelaTemporaria() {
+    protected function criarSqlCopiaDadosTabelaTemporaria()
+    {
         $sqlInsertCamposNovaTabela = '(';
         $sqlSelectCamposTabelaCsv = '';
 
@@ -133,7 +131,7 @@ class GeradorTabelaCsv
     protected function executaSql(array $conjuntoQuery): void
     {
         if ($this->executarSql === '0') {
-            dump($conjuntoQuery);
+            dump($conjuntoQuery, false);
         }
 
         if (empty($this->executarSql) || $this->executarSql === '1') {

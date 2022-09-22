@@ -1,6 +1,6 @@
 <?php
 
-function dump($arg)
+function dump(mixed $arg, bool $showKeys = true)
 {
     if (is_string($arg)) {
         echo "<pre>";
@@ -11,9 +11,12 @@ function dump($arg)
     if (is_array($arg)) {
 
         foreach ($arg as $key => $val) {
-            echo "<pre>";
-            var_export($key);
-            echo "</pre>";
+
+            if ($showKeys) {
+                echo "<pre>";
+                var_export($key);
+                echo "</pre>";
+            }
 
             echo "<pre onclick='collapse_js(event)'>";
             var_export($val);
