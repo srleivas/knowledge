@@ -7,12 +7,18 @@ class DB
     private $port = '5432';
     private $dbname = 'caixeiro_viajante';
     private $user = 'postgres';
+    private $password = '';
     public $db;
     public $lastQuery;
 
     function connect()
     {
-        $connection = new PDO("pgsql:host={$this->host} port={$this->port} dbname={$this->dbname} user={$this->user}");
+        $connection = new PDO("pgsql:
+        host={$this->host} 
+        port={$this->port} 
+        dbname={$this->dbname} 
+        user={$this->user} 
+        password={$this->password}");
 
         $this->db = $connection;
     }

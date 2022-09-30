@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 require_once($_SERVER['DOCUMENT_ROOT'] . '/knowledge/util/Utils.php');
 require_once($_SERVER['DOCUMENT_ROOT'] . '/knowledge/db/ConexaoDatabase.php');
-
+require_once('./GeradorTabelaRotasRelacionamento.php');
 
 class GeradorTabelaCsv
 {
     private $db;
     private $executarSql;
     public $novaTabelaCampos = [
-        'id' => 'SERIAL',
+        'id' => 'serial UNIQUE',
         'nome' => 'TEXT',
         'latitude' => 'DOUBLE PRECISION',
         'longitude' => 'DOUBLE PRECISION',
@@ -25,14 +25,11 @@ class GeradorTabelaCsv
     ];
     public $novaTabelaNome = 'destinos';
 
-    public function __construct()
+    public function __construct($executarSql = true)
     {
         $this->db = new DB;
         $this->db->connect();
-
-        if (isset($_POST['executar_sql'])) {
-            $this->executarSql = $_POST['executar_sql'];
-        }
+        $this->executarSql = $executarSql;
     }
 
     public function importaCsvEmTabela(string $caminhoArquivo)
@@ -52,7 +49,7 @@ class GeradorTabelaCsv
         $conjuntoQuery[] = $this->criarSqlNovaTabela();
         $conjuntoQuery[] = $this->criarSqlCopiaDadosTabelaTemporaria();
 
-        $this->executaSql($conjuntoQuery);
+        $this->executarSql($conjuntoQuery);
     }
 
     protected function criarSqlTabelaTemporaria(array $colunas): string
@@ -128,22 +125,24 @@ class GeradorTabelaCsv
         return $sql;
     }
 
-    protected function executaSql(array $conjuntoQuery): void
+    protected function executarSql(array $conjuntoQuery): void
     {
-        if ($this->executarSql === '0') {
+        if ($this->executarSql == false) {
             dump($conjuntoQuery, false);
         }
 
-        if (empty($this->executarSql) || $this->executarSql === '1') {
+        if ($this->executarSql == true) {
             foreach ($conjuntoQuery as $sql) {
                 $this->db->query($sql);
             }
         }
     }
 }
+$caminhoCsv = $_SERVER['DOCUMENT_ROOT'] . '/knowledge/db/csv/worldcities.csv';
+$executarSql = isset($_POST['executarSql']) ? $_POST['executarSql'] : false;
 
-$GeradorTabelaCsv = new GeradorTabelaCsv;
-$GeradorTabelaCsv->importaCsvEmTabela($_SERVER['DOCUMENT_ROOT'] . '/knowledge/db/csv/worldcities.csv');
+$GeradorTabelaCsv = new GeradorTabelaCsv($executarSql);
+$GeradorTabelaCsv->importaCsvEmTabela($caminhoCsv);
 ?>
 
 <button><a href="./index.php" style="text-decoration:none;color:inherit">Voltar</a></button>
