@@ -1,12 +1,12 @@
 #Alias personalizados
 apachefolder() {
-    $path = "/var/www/html";
+    path="/var/www/html"
 
-    if [ $1 ] then
-        $path = "${path}/${1}";
-    fi
-
-    echo "${1}";
+    if [ 1 ]; then
+        path="${path}/${1}";
+    fi;
 
     cd $path;
 }
+
+alias projectsfolder="cd /home/$(whoami)/Doc*/projects";
