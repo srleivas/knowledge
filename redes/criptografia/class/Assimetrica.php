@@ -1,13 +1,26 @@
 <?php
 
-namespace Criptografia;
+namespace Class;
 
-require_once(__DIR__ . '/../interface/CriptografiaAssimetricaInterface.php');
+use Interface\CriptografiaAssimetricaInterface;
 
-class Assimetrica implements CriptografiaAssimetricaAbstract
+class Assimetrica implements CriptografiaAssimetricaInterface
 {
+    public function gerarChavePrivada()
+    {
+    }
+
+    public function gerarChavePublica()
+    {
+    }
+
+    public function gerarChaves()
+    {
+        $mdc = $this->retornaMdc(20, 100);
+    }
+
     /**
-     * Retorna o múltiplo divisor comum
+     * Retorna o mÃºltiplo divisor comum
      * @return int mdc
      */
     public function retornaMdc(int $a, int $b): int
@@ -24,18 +37,5 @@ class Assimetrica implements CriptografiaAssimetricaAbstract
             $b = $resto;
             $a = $b;
         }
-    }
-
-    public function gerarChavePrivada()
-    {
-    }
-
-    public function gerarChavePublica()
-    {
-    }
-
-    public function gerarChaves()
-    {
-        $mdc = $this->retornaMdc(20, 100);
     }
 }

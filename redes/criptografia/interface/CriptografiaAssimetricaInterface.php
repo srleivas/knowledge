@@ -1,8 +1,8 @@
 <?php
 
-namespace Criptografia;
+namespace Interface;
 
-interface CriptografiaAssimetricaAbstract
+interface CriptografiaAssimetricaInterface
 {
     public function gerarChavePrivada();
 
