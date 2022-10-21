@@ -4,13 +4,14 @@ expire=1m
 
 while getopts m:n:e: flag
     do 
-        case $flag in
+        case "${flag}" in
             m) email=${OPTARG};;
             n) name=${OPTARG};;
             e) expire=${OPTARG};;
-            k) create_new_key=n
+            *) ;;
         esac
     done
+  exit;
 
 
 gpg --batch --gen-key <<EOF
@@ -24,20 +25,20 @@ gpg --batch --gen-key <<EOF
 EOF
 
 clear && gpg --list-secret-keys --keyid-format=long;
-read -i '' -p "Select ONLY your private key id (rsaXXXX/keyID): " privatekeyid
+read -r -i '' -p "Select ONLY your private key id (rsaXXXX/keyID): " privatekeyid
 
-git config --global user.signingkey $privatekeyid
-[ -f ~/.bashrc ] && echo 'export GPG_TTY=$(tty)' >> ~/.bashrc
+git config --global user.signingkey "$privatekeyid"
+[ -f ~/.bashrc ] && echo "export GPG_TTY=$(tty)" >> ~/.bashrc
 
 clear && gpg --list-keys --keyid-format=long;
-read -i '' -p "Select ONLY your public key id (rsaXXXX/keyID): " publickeyid
+read -r -i '' -p "Select ONLY your public key id (rsaXXXX/keyID): " publickeyid
 
-clear && gpg --armor --export $publickeyid;
+clear && gpg --armor --export "$publickeyid";
 
-read -i '' -p 'Habilitar assinatura globalmente? (Default=local) (y/n): ' globalsign
+read -r -i '' -p 'Habilitar assinatura globalmente? (Default=local) (y/n): ' globalsign
 clear 
 
-if [ $globalsign == "y" ] || [ $globalsign == 'yes' ]; then
+if [ "$globalsign" == "y" ] || [ "$globalsign" == 'yes' ]; then
     git config --global --unset gpg.format
     git config --global commit.gpgsign true
 else 

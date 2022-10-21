@@ -1,9 +1,9 @@
-date=$(date "+%Y.%m.%d-%H.%M.%S")
+ssh-keygen -t ed25519
+ssh-agent -s
+ssh-add ~/.ssh/id_ed25519
 
-ssh-keygen -t ed25519 -f ~/.ssh/key_"${date}"
-ssh-agent -s && clear
-ssh-add ~/.ssh/key_"${date}"
+clear
 
 echo "============= Public Key ==============="
-clear && cat ~/.ssh/id_ed25519.pub
+cat ~/.ssh/id_ed25519.pub
 echo "========================================"
