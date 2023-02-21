@@ -1,0 +1,108 @@
+<html lang="pt-Br">
+<head>
+    <meta charset="UTF-8">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://kit.fontawesome.com/19e06ea1de.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css" type="text/css">
+    <title>Chat-O</title>
+    <style>
+        .container {
+            margin-top: 10px;
+        }
+
+        #chat {
+            height: 75vh;
+            background: black;
+            margin: 10px auto;
+            overflow-y: scroll;
+        }
+
+        #chat > li {
+            color: #efefef;
+            margin: .4rem .7rem;
+            list-style: none;
+        }
+
+        #chat > li .username {
+            font-weight: bold;
+            font-style: italic;
+            margin-right: .6rem;
+        }
+
+        @media (max-width: 1360px) {
+            .title {
+                display: none;
+            }
+
+            .container {
+                margin: 0;
+                padding: 0;
+                min-width: 100%;
+            }
+
+            #chat {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="h1 title">Chat-O, seu parça de conversa.</h1>
+    <div>
+        <ul class="list-group" id="chat">
+        </ul>
+    </div>
+
+    <form class="form" id="form">
+        <div class="d-flex justify-content-center align-items-center">
+            <input
+                    placeholder="Manda a braba aqui"
+                    type="text"
+                    id="chatInput"
+                    class="form-control me-1"
+                    autocomplete="off"
+            >
+            <button class="btn">
+                <i class="far fa-paper-plane fa-lg"></i>
+            </button>
+        </div>
+    </form>
+</div>
+<script>
+    let socket = io();
+
+    const form = document.getElementById('form');
+    const chatInput = document.getElementById('chatInput');
+    const chat = document.getElementById('chat');
+
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+
+        const chatMessage = chatInput.value;
+        if (chatMessage) {
+            socket.emit('chat message', chatMessage);
+            chatInput.value = '';
+        }
+    })
+
+    socket.on('chat message', (user, msg) => {
+        const chatEntry = document.createElement('li');
+
+        const userName = document.createElement('span');
+        const userMessage = document.createElement('span');
+
+        userName.classList.add('username')
+
+        userName.textContent = user + ': ';
+        userMessage.textContent = msg
+
+        chatEntry.appendChild(userName);
+        chatEntry.appendChild(userMessage);
+        chat.appendChild(chatEntry);
+
+        chat.scrollTop = chat.scrollHeight;
+    });
+</script>
+</body>
+</html>
