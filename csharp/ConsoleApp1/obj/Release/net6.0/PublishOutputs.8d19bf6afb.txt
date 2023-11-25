@@ -1,0 +1,5 @@
+C:\Users\Noctem\Desktop\ConsoleApp1.exe
+C:\Users\Noctem\Desktop\ConsoleApp1.dll
+C:\Users\Noctem\Desktop\ConsoleApp1.deps.json
+C:\Users\Noctem\Desktop\ConsoleApp1.runtimeconfig.json
+C:\Users\Noctem\Desktop\ConsoleApp1.pdb
